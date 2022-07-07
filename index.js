@@ -109,7 +109,14 @@ app.post("/items", async (req, res) => {
       return res.status(500).send(err.message);
     
     }
-    
+
   });
  
-  
+  app.listen(process.env.PORT || 2345, async function () {
+  try {
+    await connect();
+    console.log("listening on port 2345");
+  } catch (e) {
+    console.log(e.message);
+  }
+});
