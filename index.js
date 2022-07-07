@@ -47,37 +47,69 @@ const itemSchema = new mongoose.Schema(
   
 app.post("/items", async (req, res) => {
     try {
-      const item = await ItemMaster.create(req.body);
+      const itemMaster = await ItemMaster.create(req.body);
   
-      return res.status(201).send(item);
+      return res.status(201).send(itemMaster);
     } catch (err) {
       return res.status(500).send(err.message);
     }
   });
   
-//   app.get("/users", async (req, res) => {
-//     // thennable => proper then
-//     try {
-//       const users = await User.find().lean().exec(); // db.users.find() // proper promise
+
+  app.post("/order", async (req, res) => {
+    try {
+      const userCart = await UserCart.create(req.body);
   
-//       return res.send(users);
-//     } catch (err) {
-//       return res.status(500).send(err.message);
-//     }
-//   });
-  
-//   // met + route => get /users/${variable} and the name of variable is id
-//   app.get("/users/:id", async (req, res) => {
-//     try {
-//       const user = await User.findById(req.params.id).lean().exec();
-  
-//       if (user) {
-//         return res.send(user);
-//       } else {
-//         return res.status(404).send({ message: "User not found" });
-//       }
-//     } catch (err) {
-//       return res.status(500).send(err.message);
-//     }
-//   });
+      return res.send(userCart);
+    } catch (err) {
+      return res.status(500).send(err.message);
+    }
+  });
+
+
+  app.get("/summarize", async (req, res) => {
+
+    try {
+
+    let summarizeData = getUniquePrducts(UserCart);
+
+    function checkAndUpdate(arr, product) {
+
+        let respectiveIndex = arr.findIndex( (el) => (el.code == product.code) );
+       
+        if( respectiveIndex == -1 ) {
+            arr.push(product);
+        } else {
+            arr[respectiveIndex].qty = arr[respectiveIndex].qty + product.qty;
+        }
+          return arr;
+    }
+    
+    
+    function getUniquePrducts(listOfProducts) {
+    
+        let OutputArr = new Array(0);
+       
+        for (let i = 0; i < listOfProducts.length; i++) {
+    
+            checkAndUpdate(OutputArr, listOfProducts[i]);
+    
+        } 
+    
+        return OutputArr;
+    
+    } 
+    
+      let userCart = await summarizeData.find().lean().exec();  
+
+      return res.send(userCart);
+
+    } catch (err) {
+
+      return res.status(500).send(err.message);
+    
+    }
+    
+  });
+ 
   
